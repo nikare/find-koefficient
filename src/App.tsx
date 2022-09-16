@@ -11,13 +11,18 @@ interface IStock {
   prefTicker?: string;
 }
 
-type LsData = { isWeightSort: boolean; isAllVisible: boolean; hidden: string[] };
+type LsData = { isWeightSort: boolean; isAllVisible: boolean; hidden: string[]; service: string };
 
 const BASE_URL = 'https://iss.moex.com/iss';
 const LS_KEY = 'imoex_securities';
 
 const LS_DATA = localStorage.getItem(LS_KEY);
-const defaultLsData: LsData = { isWeightSort: false, isAllVisible: false, hidden: [] };
+const defaultLsData: LsData = {
+  isWeightSort: false,
+  isAllVisible: false,
+  hidden: [],
+  service: 'snowball',
+};
 
 export const App = () => {
   const [lsData, setLsData] = useState<typeof defaultLsData>(
@@ -57,9 +62,17 @@ export const App = () => {
     });
   };
 
-  const onSelect = () => {
+  const onChangeSort = () => {
     setLsData((prevState) => {
       const newState = { ...prevState, isWeightSort: !prevState.isWeightSort };
+      localStorage.setItem(LS_KEY, JSON.stringify(newState));
+      return newState;
+    });
+  };
+
+  const onChangeService = (value: LsData['service']) => {
+    setLsData((prevState) => {
+      const newState = { ...prevState, service: value };
       localStorage.setItem(LS_KEY, JSON.stringify(newState));
       return newState;
     });
@@ -157,6 +170,13 @@ export const App = () => {
       <h1>Индекс МосБиржи ({new Date(dateTime).toLocaleDateString('ru-RU')}г.)</h1>
       <form className="pure-form">
         <fieldset>
+          <span>Открывать ссылки в </span>
+          <select onChange={(event) => onChangeService(event.target.value)} value={lsData.service}>
+            <option value="snowball">snowball-income.com</option>
+            <option value="investmint">investmint.ru</option>
+          </select>
+        </fieldset>
+        <fieldset>
           {normalizedStocks.length > withoutHidden.length && (
             <label>
               <input type="checkbox" onChange={onChecked} checked={lsData.isAllVisible} />
@@ -164,7 +184,7 @@ export const App = () => {
             </label>
           )}
           <span>Сортировать по: </span>
-          <select onChange={onSelect} value={lsData.isWeightSort ? 'weight' : 'ticker'}>
+          <select onChange={onChangeSort} value={lsData.isWeightSort ? 'weight' : 'ticker'}>
             <option value="ticker">Тикеру</option>
             <option value="weight">Весу</option>
           </select>
@@ -183,31 +203,31 @@ export const App = () => {
         </thead>
         <tbody>
           {filteredStocks.map(({ ticker, prefTicker, title, weight, isHidden }, index) => {
+            const isInvestmint = lsData.service === 'investmint';
+            const urlAo = isInvestmint
+              ? `https://investmint.ru/${ticker}/`
+              : `https://snowball-income.com/public/asset/${ticker}.MCX`;
+
+            const urlPref = isInvestmint
+              ? `https://investmint.ru/${prefTicker}/`
+              : `https://snowball-income.com/public/asset/${prefTicker}.MCX`;
+
             return (
               <tr key={index} className={isHidden ? 'is-hidden' : ''}>
                 <td>{index + 1}</td>
                 <td>
                   {prefTicker ? (
                     <div>
-                      <a
-                        href={`https://snowball-income.com/public/asset/${ticker}.MCX`}
-                        target="_blank"
-                        rel="noreferrer">
+                      <a href={urlAo} target="_blank" rel="noreferrer">
                         {ticker}
                       </a>
                       <span> / </span>
-                      <a
-                        href={`https://snowball-income.com/public/asset/${prefTicker}.MCX`}
-                        target="_blank"
-                        rel="noreferrer">
+                      <a href={urlPref} target="_blank" rel="noreferrer">
                         {prefTicker}
                       </a>
                     </div>
                   ) : (
-                    <a
-                      href={`https://snowball-income.com/public/asset/${ticker}.MCX`}
-                      target="_blank"
-                      rel="noreferrer">
+                    <a href={urlAo} target="_blank" rel="noreferrer">
                       {ticker}
                     </a>
                   )}
