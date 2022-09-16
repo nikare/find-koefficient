@@ -126,9 +126,9 @@ export const App = () => {
       let leftValue = Math.round((100 - accum.total) * 100) / 100;
 
       const distribute = () => {
-        const filteredStake = Object.entries(accum).filter(
-          ([key, value]) => key !== 'total' && value > 0 && value < 15,
-        );
+        const filteredStake = Object.entries(accum)
+          .filter(([key, value]) => key !== 'total' && value > 0 && value < 15)
+          .sort((a, b) => b[1] - a[1]);
 
         if (leftValue > 0) {
           for (let i = filteredStake.length; i--; ) {
