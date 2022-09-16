@@ -9,7 +9,7 @@ interface IStock {
   isPref: boolean;
   withPref: boolean;
   eq: string;
-  pseudo_ticker?: string;
+  prefTicker?: string;
 }
 
 const BASE_URL = 'https://iss.moex.com/iss';
@@ -84,7 +84,7 @@ export const App = () => {
       prefStock.isPref = true;
       return {
         ...stock,
-        pseudo_ticker: `${stock.ticker} / ${prefStock.ticker}`,
+        prefTicker: prefStock.ticker,
         weight: Math.floor((stock.weight + prefStock.weight) * 100) / 100,
         withPref: true,
       };
@@ -188,17 +188,35 @@ export const App = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredStocks.map(({ eq, ticker, pseudo_ticker, title, weight, isHidden }, index) => {
+          {filteredStocks.map(({ eq, ticker, prefTicker, title, weight, isHidden }, index) => {
             return (
               <tr key={index} className={isHidden ? 'is-hidden' : ''}>
                 <td>{eq}</td>
                 <td>
-                  <a
-                    href={`https://snowball-income.com/public/asset/${ticker}.MCX`}
-                    target="_blank"
-                    rel="noreferrer">
-                    {pseudo_ticker || ticker}
-                  </a>
+                  {prefTicker ? (
+                    <div>
+                      <a
+                        href={`https://snowball-income.com/public/asset/${ticker}.MCX`}
+                        target="_blank"
+                        rel="noreferrer">
+                        {ticker}
+                      </a>
+                      <span> / </span>
+                      <a
+                        href={`https://snowball-income.com/public/asset/${prefTicker}.MCX`}
+                        target="_blank"
+                        rel="noreferrer">
+                        {prefTicker}
+                      </a>
+                    </div>
+                  ) : (
+                    <a
+                      href={`https://snowball-income.com/public/asset/${ticker}.MCX`}
+                      target="_blank"
+                      rel="noreferrer">
+                      {ticker}
+                    </a>
+                  )}
                 </td>
                 <td>{title}</td>
                 <td>{weight}%</td>
