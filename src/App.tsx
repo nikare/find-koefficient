@@ -8,7 +8,6 @@ interface IStock {
   isHidden: boolean;
   isPref: boolean;
   withPref: boolean;
-  eq: string;
   prefTicker?: string;
 }
 
@@ -106,18 +105,6 @@ export const App = () => {
   const withoutHidden = filteredStocks.filter(({ isHidden }) => !isHidden);
   const isShowedMoreThan10 = withoutHidden.length > 10;
 
-  let eq = 0;
-  withoutHidden.forEach((stock) => {
-    eq = eq + 1;
-
-    if (stock.withPref) {
-      stock.eq = `${eq} / ${eq + 1}`;
-      eq = eq + 1;
-    } else {
-      stock.eq = `${eq}`;
-    }
-  });
-
   const totalWeight = withoutHidden.reduce((accum, { weight }) => {
     return Math.round((accum + weight) * 100) / 100;
   }, 0);
@@ -195,10 +182,10 @@ export const App = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredStocks.map(({ eq, ticker, prefTicker, title, weight, isHidden }, index) => {
+          {filteredStocks.map(({ ticker, prefTicker, title, weight, isHidden }, index) => {
             return (
               <tr key={index} className={isHidden ? 'is-hidden' : ''}>
-                <td>{eq}</td>
+                <td>{index + 1}</td>
                 <td>
                   {prefTicker ? (
                     <div>
