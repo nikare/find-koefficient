@@ -84,6 +84,22 @@ a:hover,
   margin-right: 30px;
 }
 
+.pure-table tr {
+  position: relative;
+}
+
 .pure-table tr.is-hidden {
   background: rgba(255, 0, 0, 0.15);
+}
+
+.pure-table tr:hover::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.12);
+  pointer-events: none;
 }
