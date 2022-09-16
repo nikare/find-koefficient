@@ -12,16 +12,18 @@ interface IStock {
   prefTicker?: string;
 }
 
+type LsData = { isWeightSort: boolean; isAllVisible: boolean; hidden: string[] };
+
 const BASE_URL = 'https://iss.moex.com/iss';
 const LS_KEY = 'imoex_securities';
 
 const LS_DATA = localStorage.getItem(LS_KEY);
-const defaultLsData = { isWeightSort: false, isAllVisible: false, hidden: [] };
-const lsData = LS_DATA ? JSON.parse(LS_DATA) : defaultLsData;
+const defaultLsData: LsData = { isWeightSort: false, isAllVisible: false, hidden: [] };
 
 export const App = () => {
-  const [isWeightSort, setIsWeightSort] = useState<boolean>(lsData.isWeightSort || false);
-  const [isAllVisible, setIsAllVisible] = useState<boolean>(lsData.isAllVisible || false);
+  const [lsData, setLsData] = useState<typeof defaultLsData>(
+    LS_DATA ? JSON.parse(LS_DATA) : defaultLsData,
+  );
   const [dateTime, setDateTime] = useState<string>();
   const [stocks, setStocks] = useState<IStock[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,24 +44,24 @@ export const App = () => {
       setDateTime(data['analytics.dates'].data[0][1]);
       setStocks((prevState) => [...prevState, ...stocksPart]);
     });
-  }, [isLoaded, stocks.length]);
+  }, [isLoaded, lsData.hidden, stocks.length]);
 
   if (!isLoaded || !dateTime) {
     return null;
   }
 
   const onChecked = () => {
-    setIsAllVisible((pervState) => {
-      const newState = !pervState;
-      localStorage.setItem(LS_KEY, JSON.stringify({ ...lsData, isAllVisible: newState }));
+    setLsData((prevState) => {
+      const newState = { ...prevState, isAllVisible: !prevState.isAllVisible };
+      localStorage.setItem(LS_KEY, JSON.stringify(newState));
       return newState;
     });
   };
 
   const onSelect = () => {
-    setIsWeightSort((prevState) => {
-      const newState = !prevState;
-      localStorage.setItem(LS_KEY, JSON.stringify({ ...lsData, isWeightSort: newState }));
+    setLsData((prevState) => {
+      const newState = { ...prevState, isWeightSort: !prevState.isWeightSort };
+      localStorage.setItem(LS_KEY, JSON.stringify(newState));
       return newState;
     });
   };
@@ -72,7 +74,12 @@ export const App = () => {
       const hiddenTickets = newStocks
         .filter(({ isHidden }) => isHidden)
         .map(({ ticker }) => ticker);
-      localStorage.setItem(LS_KEY, JSON.stringify({ ...lsData, hidden: hiddenTickets }));
+
+      setLsData((prevState) => {
+        const newState = { ...prevState, hidden: hiddenTickets };
+        localStorage.setItem(LS_KEY, JSON.stringify(newState));
+        return newState;
+      });
       return newStocks;
     });
   };
@@ -92,10 +99,10 @@ export const App = () => {
     .filter(({ isPref }) => !isPref);
 
   const sortedStocks = [...normalizedStocks].sort((a, b) =>
-    isWeightSort ? b.weight - a.weight : 1,
+    lsData.isWeightSort ? b.weight - a.weight : 1,
   );
 
-  const filteredStocks = sortedStocks.filter(({ isHidden }) => isAllVisible || !isHidden);
+  const filteredStocks = sortedStocks.filter(({ isHidden }) => lsData.isAllVisible || !isHidden);
   const withoutHidden = filteredStocks.filter(({ isHidden }) => !isHidden);
   const isShowedMoreThan10 = withoutHidden.length > 10;
 
@@ -165,12 +172,12 @@ export const App = () => {
         <fieldset>
           {normalizedStocks.length > withoutHidden.length && (
             <label>
-              <input type="checkbox" onChange={onChecked} checked={isAllVisible} />
+              <input type="checkbox" onChange={onChecked} checked={lsData.isAllVisible} />
               <span> Показать все</span>
             </label>
           )}
           <span>Сортировать по: </span>
-          <select onChange={onSelect} value={isWeightSort ? 'weight' : 'ticker'}>
+          <select onChange={onSelect} value={lsData.isWeightSort ? 'weight' : 'ticker'}>
             <option value="ticker">Тикеру</option>
             <option value="weight">Весу</option>
           </select>
