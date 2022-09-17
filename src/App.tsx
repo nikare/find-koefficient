@@ -168,12 +168,9 @@ export const App = () => {
               onChange={onChangeIndexId}>
               <option value={INDEX_IDS.IMOEX[0]}>{INDEX_IDS.IMOEX[1]}</option>
               <option value={INDEX_IDS.MOEXBC[0]}>{INDEX_IDS.MOEXBC[1]}</option>
-              <option value={INDEX_IDS.MOEX10[0]}>{INDEX_IDS.MOEX10[1]}</option>
               <option value={INDEX_IDS.RGBITR[0]}>{INDEX_IDS.RGBITR[1]}</option>
-              <option value={INDEX_IDS.RUCBHYTR[0]}>{INDEX_IDS.RUCBHYTR[1]}</option>
               <option value={INDEX_IDS.RUCBITR[0]}>{INDEX_IDS.RUCBITR[1]}</option>
               <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option>
-              <option value={INDEX_IDS.RUMBITR[0]}>{INDEX_IDS.RUMBITR[1]}</option>
             </select>
           </div>
           <span className="date-time">{new Date(dateTime).toLocaleDateString('ru-RU')}г.</span>

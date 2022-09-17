@@ -14,10 +14,7 @@ export const INITIAL_DATA: ILsData = {
 export const INDEX_IDS: { [key in IndexIds]: [IndexIds, string, SecuritiesType] } = {
   IMOEX: ['IMOEX', 'Индекс МосБиржи', 'stocks'],
   MOEXBC: ['MOEXBC', 'Индекс голубых фишек', 'stocks'],
-  MOEX10: ['MOEX10', 'Индекс МосБиржи 10', 'stocks'],
   RGBITR: ['RGBITR', 'Индекс государственных облигаций', 'bonds'],
-  RUMBITR: ['RUMBITR', 'Индекс муниципальных облигаций', 'bonds'],
   RUCBITR: ['RUCBITR', 'Индекс корпоративных облигаций', 'bonds'],
   RUEYBCSTR: ['RUEYBCSTR', 'Индекс облигаций повышенной доходности', 'bonds'],
-  RUCBHYTR: ['RUCBHYTR', 'Индекс ВДО ПИР', 'bonds'],
 };
