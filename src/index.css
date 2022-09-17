@@ -21,6 +21,10 @@ h1 {
   color: #1e87f0;
 }
 
+.title-wrapper:hover {
+  text-decoration: underline;
+}
+
 .pure-form .title-select {
   position: absolute;
   top: 0;
