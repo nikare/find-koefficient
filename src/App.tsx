@@ -184,7 +184,6 @@ export const App = () => {
           <select onChange={onChangeService} value={lsData.service}>
             <option value="tinkoff">tinkoff.ru</option>
             <option value="snowball">snowball-income.com</option>
-            <option value="investmint">investmint.ru</option>
           </select>
         </fieldset>
         <fieldset>
@@ -218,7 +217,6 @@ export const App = () => {
 
             const LINKS: { [key in Services]: string } = {
               tinkoff: `https://www.tinkoff.ru/invest/${INDEX_IDS[lsData.indexId][2]}`,
-              investmint: 'https://investmint.ru',
               snowball: 'https://snowball-income.com/public/asset',
             };
 

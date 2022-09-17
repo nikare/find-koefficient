@@ -1,4 +1,4 @@
-export type Services = 'tinkoff' | 'investmint' | 'snowball';
+export type Services = 'tinkoff' | 'snowball';
 export type IndexIds =
   | 'IMOEX'
   | 'MOEXBC'
