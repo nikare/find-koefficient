@@ -11,7 +11,7 @@ export const App = () => {
   const [stocks, setStocks] = useState<IStock[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [lsData, setLsData] = useState<typeof INITIAL_DATA>(
-    LS_DATA ? JSON.parse(LS_DATA) : INITIAL_DATA,
+    LS_DATA ? { ...INITIAL_DATA, ...JSON.parse(LS_DATA) } : INITIAL_DATA,
   );
 
   useEffect(() => {
@@ -161,7 +161,7 @@ export const App = () => {
       <form className="pure-form">
         <h1>
           <div className="title-wrapper">
-            {INDEX_IDS[lsData.indexId][1]}
+            {`${INDEX_IDS[lsData.indexId][1]} - ${INDEX_IDS[lsData.indexId][0]}`}
             <select
               className="title-select"
               value={INDEX_IDS[lsData.indexId][0]}
@@ -176,7 +176,7 @@ export const App = () => {
               <option value={INDEX_IDS.RUMBITR[0]}>{INDEX_IDS.RUMBITR[1]}</option>
             </select>
           </div>
-          <span>({new Date(dateTime).toLocaleDateString('ru-RU')}г.)</span>
+          <span className="date-time">{new Date(dateTime).toLocaleDateString('ru-RU')}г.</span>
         </h1>
 
         <fieldset>
