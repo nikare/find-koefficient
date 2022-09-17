@@ -1,59 +1,35 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-interface IStock {
-  ticker: string;
-  title: string;
-  weight: number;
-  isHidden: boolean;
-  isPref: boolean;
-  withPref: boolean;
-  prefTicker?: string;
-}
+import { ILsData, IndexIds, IStock, Services } from './interfaces';
+import { INITIAL_DATA, LS_KEY, BASE_URL, INDEX_IDS } from './constants';
 
-type LsData = { isWeightSort: boolean; isAllVisible: boolean; hidden: string[]; service: string };
-
-const BASE_URL = 'https://iss.moex.com/iss';
-const LS_KEY = 'imoex_securities';
-
-const LINKS: { [key: string]: string } = {
-  tinkoff: 'https://www.tinkoff.ru/invest/stocks',
-  investmint: 'https://investmint.ru',
-};
-
-const LS_DATA = localStorage.getItem(LS_KEY);
-const defaultLsData: LsData = {
-  isWeightSort: false,
-  isAllVisible: false,
-  hidden: [],
-  service: 'tinkoff',
-};
+export const LS_DATA = localStorage.getItem(LS_KEY);
 
 export const App = () => {
-  const [lsData, setLsData] = useState<typeof defaultLsData>(
-    LS_DATA ? JSON.parse(LS_DATA) : defaultLsData,
-  );
   const [dateTime, setDateTime] = useState<string>();
   const [stocks, setStocks] = useState<IStock[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [lsData, setLsData] = useState<typeof INITIAL_DATA>(
+    LS_DATA ? JSON.parse(LS_DATA) : INITIAL_DATA,
+  );
 
   useEffect(() => {
-    if (isLoaded) return;
-    const url = `${BASE_URL}/statistics/engines/stock/markets/index/analytics/IMOEX.json`;
-    const params = `iss.meta=off&start=${stocks.length}`;
+    const url = `${BASE_URL}/${lsData.indexId}.json`;
+    const params = `iss.meta=off&limit=1000`;
     axios.get(`${url}?${params}`).then(({ data }) => {
-      setIsLoaded(
-        stocks.length + data.analytics.data.length >= data['analytics.cursor'].data[0][1],
-      );
-      const stocksPart: IStock[] = data.analytics.data.map(
-        ([_, , ticker, title, , weight]: [any, any, string, string, any, number]) => {
-          return { ticker, title, weight, isHidden: lsData.hidden.includes(ticker) };
-        },
-      );
       setDateTime(data['analytics.dates'].data[0][1]);
-      setStocks((prevState) => [...prevState, ...stocksPart]);
+      setStocks(
+        data.analytics.data.map(
+          ([_, , ticker, title, , weight]: [any, any, string, string, any, number]) => {
+            return { ticker, title, weight, isHidden: lsData.hidden.includes(ticker) };
+          },
+        ),
+      );
+      setIsLoaded(true);
     });
-  }, [isLoaded, lsData.hidden, stocks.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lsData.indexId]);
 
   if (!isLoaded || !dateTime) {
     return null;
@@ -75,9 +51,19 @@ export const App = () => {
     });
   };
 
-  const onChangeService = (value: LsData['service']) => {
+  const onChangeService = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const service = event.target.value as ILsData['service'];
     setLsData((prevState) => {
-      const newState = { ...prevState, service: value };
+      const newState = { ...prevState, service };
+      localStorage.setItem(LS_KEY, JSON.stringify(newState));
+      return newState;
+    });
+  };
+
+  const onChangeIndexId = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const indexId = event.target.value as IndexIds;
+    setLsData((prevState) => {
+      const newState = { ...prevState, indexId };
       localStorage.setItem(LS_KEY, JSON.stringify(newState));
       return newState;
     });
@@ -172,11 +158,30 @@ export const App = () => {
 
   return (
     <div className="app">
-      <h1>Индекс МосБиржи ({new Date(dateTime).toLocaleDateString('ru-RU')}г.)</h1>
       <form className="pure-form">
+        <h1>
+          <div className="title-wrapper">
+            {INDEX_IDS[lsData.indexId][1]}
+            <select
+              className="title-select"
+              value={INDEX_IDS[lsData.indexId][0]}
+              onChange={onChangeIndexId}>
+              <option value={INDEX_IDS.IMOEX[0]}>{INDEX_IDS.IMOEX[1]}</option>
+              <option value={INDEX_IDS.MOEXBC[0]}>{INDEX_IDS.MOEXBC[1]}</option>
+              <option value={INDEX_IDS.MOEX10[0]}>{INDEX_IDS.MOEX10[1]}</option>
+              <option value={INDEX_IDS.RGBITR[0]}>{INDEX_IDS.RGBITR[1]}</option>
+              <option value={INDEX_IDS.RUCBHYTR[0]}>{INDEX_IDS.RUCBHYTR[1]}</option>
+              <option value={INDEX_IDS.RUCBITR[0]}>{INDEX_IDS.RUCBITR[1]}</option>
+              <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option>
+              <option value={INDEX_IDS.RUMBITR[0]}>{INDEX_IDS.RUMBITR[1]}</option>
+            </select>
+          </div>
+          <span>({new Date(dateTime).toLocaleDateString('ru-RU')}г.)</span>
+        </h1>
+
         <fieldset>
           <span>Открывать ссылки в </span>
-          <select onChange={(event) => onChangeService(event.target.value)} value={lsData.service}>
+          <select onChange={onChangeService} value={lsData.service}>
             <option value="tinkoff">tinkoff.ru</option>
             <option value="snowball">snowball-income.com</option>
             <option value="investmint">investmint.ru</option>
@@ -210,13 +215,17 @@ export const App = () => {
         <tbody>
           {filteredStocks.map(({ ticker, prefTicker, title, weight, isHidden }, index) => {
             const isSnowball = lsData.service === 'snowball';
-            const urlAo = isSnowball
-              ? `https://snowball-income.com/public/asset/${ticker}.MCX`
-              : `${LINKS[lsData.service]}/${ticker}/`;
 
-            const urlPref = isSnowball
-              ? `https://snowball-income.com/public/asset/${prefTicker}.MCX`
-              : `${LINKS[lsData.service]}/${prefTicker}/`;
+            const LINKS: { [key in Services]: string } = {
+              tinkoff: `https://www.tinkoff.ru/invest/${INDEX_IDS[lsData.indexId][2]}`,
+              investmint: 'https://investmint.ru',
+              snowball: 'https://snowball-income.com/public/asset',
+            };
+
+            const link = LINKS[lsData.service];
+
+            const urlAo = isSnowball ? `${link}/${ticker}.MCX` : `${link}/${ticker}/`;
+            const urlPref = isSnowball ? `${link}/${prefTicker}.MCX` : `${link}/${prefTicker}/`;
 
             return (
               <tr key={index} className={isHidden ? 'is-hidden' : ''}>
