@@ -16,12 +16,17 @@ type LsData = { isWeightSort: boolean; isAllVisible: boolean; hidden: string[]; 
 const BASE_URL = 'https://iss.moex.com/iss';
 const LS_KEY = 'imoex_securities';
 
+const LINKS: { [key: string]: string } = {
+  tinkoff: 'https://www.tinkoff.ru/invest/stocks',
+  investmint: 'https://investmint.ru',
+};
+
 const LS_DATA = localStorage.getItem(LS_KEY);
 const defaultLsData: LsData = {
   isWeightSort: false,
   isAllVisible: false,
   hidden: [],
-  service: 'snowball',
+  service: 'tinkoff',
 };
 
 export const App = () => {
@@ -172,6 +177,7 @@ export const App = () => {
         <fieldset>
           <span>Открывать ссылки в </span>
           <select onChange={(event) => onChangeService(event.target.value)} value={lsData.service}>
+            <option value="tinkoff">tinkoff.ru</option>
             <option value="snowball">snowball-income.com</option>
             <option value="investmint">investmint.ru</option>
           </select>
@@ -203,14 +209,14 @@ export const App = () => {
         </thead>
         <tbody>
           {filteredStocks.map(({ ticker, prefTicker, title, weight, isHidden }, index) => {
-            const isInvestmint = lsData.service === 'investmint';
-            const urlAo = isInvestmint
-              ? `https://investmint.ru/${ticker}/`
-              : `https://snowball-income.com/public/asset/${ticker}.MCX`;
+            const isSnowball = lsData.service === 'snowball';
+            const urlAo = isSnowball
+              ? `https://snowball-income.com/public/asset/${ticker}.MCX`
+              : `${LINKS[lsData.service]}/${ticker}/`;
 
-            const urlPref = isInvestmint
-              ? `https://investmint.ru/${prefTicker}/`
-              : `https://snowball-income.com/public/asset/${prefTicker}.MCX`;
+            const urlPref = isSnowball
+              ? `https://snowball-income.com/public/asset/${prefTicker}.MCX`
+              : `${LINKS[lsData.service]}/${prefTicker}/`;
 
             return (
               <tr key={index} className={isHidden ? 'is-hidden' : ''}>
