@@ -16,7 +16,7 @@ export const App = () => {
 
   useEffect(() => {
     if (Array.isArray(lsData.hidden)) {
-      lsData.hidden = { MOEXBC: [], IMOEX: [], RGBITR: [], RUEYBCSTR: [] };
+      lsData.hidden = { IMOEX: [], RGBITR: [], RUEYBCSTR: [] };
     }
     const urlPart = 'statistics/engines/stock/markets/index/analytics';
     const params = 'iss.meta=off&limit=1000';
@@ -204,7 +204,6 @@ export const App = () => {
               value={INDEX_IDS[lsData.indexId][0]}
               onChange={onChangeIndexId}>
               <option value={INDEX_IDS.IMOEX[0]}>{INDEX_IDS.IMOEX[1]}</option>
-              <option value={INDEX_IDS.MOEXBC[0]}>{INDEX_IDS.MOEXBC[1]}</option>
               <option value={INDEX_IDS.RGBITR[0]}>{INDEX_IDS.RGBITR[1]}</option>
               <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option>
             </select>
