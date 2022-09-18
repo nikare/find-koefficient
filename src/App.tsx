@@ -238,7 +238,7 @@ export const App = () => {
             <th>#</th>
             <th>Тикер</th>
             <th>Название</th>
-            {INDEX_IDS[lsData.indexId][2] === 'stocks' && <th>Текущая цена</th>}
+            {INDEX_IDS[lsData.indexId][2] === 'stocks' && <th>Цена за акцию</th>}
             <th>Вес в индексе</th>
             <th>Доля в портфеле</th>
             <th></th>
