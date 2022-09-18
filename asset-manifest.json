@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/imoex-rebalancing/static/css/main.b24f853c.css",
-    "main.js": "/imoex-rebalancing/static/js/main.5a60a025.js",
+    "main.js": "/imoex-rebalancing/static/js/main.c42f55de.js",
     "index.html": "/imoex-rebalancing/index.html",
     "main.b24f853c.css.map": "/imoex-rebalancing/static/css/main.b24f853c.css.map",
-    "main.5a60a025.js.map": "/imoex-rebalancing/static/js/main.5a60a025.js.map"
+    "main.c42f55de.js.map": "/imoex-rebalancing/static/js/main.c42f55de.js.map"
   },
   "entrypoints": [
     "static/css/main.b24f853c.css",
-    "static/js/main.5a60a025.js"
+    "static/js/main.c42f55de.js"
   ]
 }
