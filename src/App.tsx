@@ -89,6 +89,7 @@ export const App = () => {
       setLsData((prevState) => {
         const newState = { ...prevState };
         newState.hidden[lsData.indexId] = hiddenTickets;
+        if (hiddenTickets.length === 0) newState.isAllVisible = false;
         localStorage.setItem(LS_KEY, JSON.stringify(newState));
         return newState;
       });
