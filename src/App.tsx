@@ -169,7 +169,6 @@ export const App = () => {
               <option value={INDEX_IDS.IMOEX[0]}>{INDEX_IDS.IMOEX[1]}</option>
               <option value={INDEX_IDS.MOEXBC[0]}>{INDEX_IDS.MOEXBC[1]}</option>
               <option value={INDEX_IDS.RGBITR[0]}>{INDEX_IDS.RGBITR[1]}</option>
-              <option value={INDEX_IDS.RUCBITR[0]}>{INDEX_IDS.RUCBITR[1]}</option>
               <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option>
             </select>
           </div>

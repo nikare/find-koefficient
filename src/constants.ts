@@ -15,6 +15,5 @@ export const INDEX_IDS: { [key in IndexIds]: [IndexIds, string, SecuritiesType] 
   IMOEX: ['IMOEX', 'Индекс МосБиржи', 'stocks'],
   MOEXBC: ['MOEXBC', 'Индекс голубых фишек', 'stocks'],
   RGBITR: ['RGBITR', 'Индекс государственных облигаций', 'bonds'],
-  RUCBITR: ['RUCBITR', 'Индекс корпоративных облигаций', 'bonds'],
   RUEYBCSTR: ['RUEYBCSTR', 'Индекс облигаций повышенной доходности', 'bonds'],
 };

@@ -1,5 +1,5 @@
 export type Services = 'tinkoff' | 'snowball';
-export type IndexIds = 'IMOEX' | 'MOEXBC' | 'RGBITR' | 'RUCBITR' | 'RUEYBCSTR';
+export type IndexIds = 'IMOEX' | 'MOEXBC' | 'RGBITR' | 'RUEYBCSTR';
 export type SecuritiesType = 'bonds' | 'stocks';
 
 export interface IStock {
