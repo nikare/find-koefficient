@@ -5,6 +5,9 @@ export type SecuritiesType = 'bonds' | 'stocks';
 export interface IStock {
   ticker: string;
   title: string;
+  price: number;
+  change: number;
+  percentChange: number;
   weight: number;
   isHidden: boolean;
   isPref: boolean;

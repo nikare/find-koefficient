@@ -15,26 +15,53 @@ export const App = () => {
   );
 
   useEffect(() => {
-    const url = `${BASE_URL}/${lsData.indexId}.json`;
-    const params = `iss.meta=off&limit=1000`;
     if (Array.isArray(lsData.hidden)) {
       lsData.hidden = { MOEXBC: [], IMOEX: [], RGBITR: [], RUEYBCSTR: [] };
     }
-    axios.get(`${url}?${params}`).then(({ data }) => {
-      setDateTime(data['analytics.dates'].data[0][1]);
-      setStocks(
-        data.analytics.data.map(
-          ([_, , ticker, title, , weight]: [any, any, string, string, any, number]) => {
+    const urlPart = 'statistics/engines/stock/markets/index/analytics';
+    const params = 'iss.meta=off&limit=1000';
+    axios.get(`${BASE_URL}/${urlPart}/${lsData.indexId}.json?${params}`).then(({ data }) => {
+      const tickers = data.analytics.data.map(([_, , ticker]: [any, any, string]) => ticker);
+      const urlPart = 'engines/stock/markets/shares/boards/TQBR/securities.json';
+      axios.get(`${BASE_URL}/${urlPart}?${params}?iss.meta=off`).then((response) => {
+        const prices: { price: number; change: number; percentChange: number }[] =
+          response.data.marketdata.data
+            .filter(([ticker]: [string]) => {
+              return tickers.includes(ticker);
+            })
+            .map((stock: (string | number)[]) => {
+              return {
+                ticker: stock[0],
+                price: stock[12],
+                change: stock[41],
+                percentChange: stock[25],
+              };
+            })
+            .reduce((accum: any, stock: any) => {
+              accum[stock.ticker] = {
+                price: stock.price,
+                change: stock.change,
+                percentChange: stock.percentChange,
+              };
+              return accum;
+            }, {} as { [key: string]: { price: number; change: number } });
+
+        setDateTime(data['analytics.dates'].data[0][1]);
+        setStocks(
+          data.analytics.data.map((stock: any) => {
             return {
-              ticker,
-              title,
-              weight,
-              isHidden: lsData.hidden[lsData.indexId].includes(ticker),
+              ticker: stock[2],
+              title: stock[3],
+              weight: stock[5],
+              price: prices[stock[2]].price,
+              change: prices[stock[2]].change,
+              percentChange: prices[stock[2]].percentChange,
+              isHidden: lsData.hidden[lsData.indexId].includes(stock[2]),
             };
-          },
-        ),
-      );
-      setIsLoaded(true);
+          }),
+        );
+        setIsLoaded(true);
+      });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lsData.indexId]);
@@ -212,60 +239,84 @@ export const App = () => {
             <th>#</th>
             <th>Тикер</th>
             <th>Название</th>
+            {INDEX_IDS[lsData.indexId][2] === 'stocks' && <th>Текущая цена</th>}
             <th>Вес в индексе</th>
             <th>Доля в портфеле</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {filteredStocks.map(({ ticker, prefTicker, title, weight, isHidden }, index) => {
-            const isSnowball = lsData.service === 'snowball';
+          {filteredStocks.map(
+            (
+              { ticker, prefTicker, title, weight, isHidden, price, change, percentChange },
+              index,
+            ) => {
+              const isSnowball = lsData.service === 'snowball';
 
-            const LINKS: { [key in Services]: string } = {
-              tinkoff: `https://www.tinkoff.ru/invest/${INDEX_IDS[lsData.indexId][2]}`,
-              snowball: 'https://snowball-income.com/public/asset',
-            };
+              const LINKS: { [key in Services]: string } = {
+                tinkoff: `https://www.tinkoff.ru/invest/${INDEX_IDS[lsData.indexId][2]}`,
+                snowball: 'https://snowball-income.com/public/asset',
+              };
 
-            const link = LINKS[lsData.service];
+              const link = LINKS[lsData.service];
 
-            const urlAo = isSnowball ? `${link}/${ticker}.MCX` : `${link}/${ticker}/`;
-            const urlPref = isSnowball ? `${link}/${prefTicker}.MCX` : `${link}/${prefTicker}/`;
+              const urlAo = isSnowball ? `${link}/${ticker}.MCX` : `${link}/${ticker}/`;
+              const urlPref = isSnowball ? `${link}/${prefTicker}.MCX` : `${link}/${prefTicker}/`;
 
-            return (
-              <tr key={index} className={isHidden ? 'is-hidden' : ''}>
-                <td>{index + 1}</td>
-                <td>
-                  {prefTicker ? (
-                    <div>
+              return (
+                <tr key={index} className={isHidden ? 'is-hidden' : ''}>
+                  <td>{index + 1}</td>
+                  <td>
+                    {prefTicker ? (
+                      <div>
+                        <a href={urlAo} target="_blank" rel="noreferrer">
+                          {ticker}
+                        </a>
+                        <span> / </span>
+                        <a href={urlPref} target="_blank" rel="noreferrer">
+                          {prefTicker}
+                        </a>
+                      </div>
+                    ) : (
                       <a href={urlAo} target="_blank" rel="noreferrer">
                         {ticker}
                       </a>
-                      <span> / </span>
-                      <a href={urlPref} target="_blank" rel="noreferrer">
-                        {prefTicker}
-                      </a>
-                    </div>
-                  ) : (
-                    <a href={urlAo} target="_blank" rel="noreferrer">
-                      {ticker}
-                    </a>
+                    )}
+                  </td>
+                  <td>{title}</td>
+                  {INDEX_IDS[lsData.indexId][2] === 'stocks' && (
+                    <td className="price">
+                      <span>
+                        {price.toLocaleString('ru-RU')}
+                        <i>₽</i>
+                      </span>
+                      <span
+                        className={`change-stock ${
+                          change > 0 ? 'plus' : change < 0 ? 'minus' : 'neutral'
+                        }`}>
+                        <span>
+                          {`${change > 0 ? '+' : ''}${change}`}
+                          <i>₽ </i>
+                        </span>
+                        <span>{`(${change > 0 ? '+' : ''}${percentChange}%)`}</span>
+                      </span>
+                    </td>
                   )}
-                </td>
-                <td>{title}</td>
-                <td>{weight}%</td>
-                <td>{stakes[ticker]}%</td>
-                <td>
-                  <span className="link" onClick={() => hideOrVisible(ticker)}>
-                    {!isHidden ? (isShowedMoreThan10 ? 'убрать' : '') : 'вернуть'}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
+                  <td>{weight}%</td>
+                  <td>{stakes[ticker]}%</td>
+                  <td>
+                    <span className="link" onClick={() => hideOrVisible(ticker)}>
+                      {!isHidden ? (isShowedMoreThan10 ? 'убрать' : '') : 'вернуть'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            },
+          )}
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={6}>
+            <td colSpan={7}>
               <span>Итого - </span>
               <span>по весу на МосБирже: {totalWeight}%</span>
               <span> | </span>

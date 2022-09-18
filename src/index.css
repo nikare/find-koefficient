@@ -2,6 +2,7 @@
 
 .app {
   font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
   width: 90%;
   margin: 0 auto;
 }
@@ -134,4 +135,29 @@ a:hover,
 
 .pure-table tr:hover td {
   background: rgba(0, 0, 0, 0.12);
+}
+
+.pure-table .price {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pure-table .price i {
+  font-style: normal;
+  margin-left: 1.5px;
+}
+
+.pure-table .change-stock {
+  position: relative;
+  font-size: 13px;
+  margin-left: 5px;
+  top: -3px;
+}
+
+.pure-table .change-stock.plus {
+  color: #0ea600;
+}
+
+.change-stock.minus {
+  color: red;
 }

@@ -1,6 +1,6 @@
 import { ILsData, IndexIds, SecuritiesType } from './interfaces';
 
-export const BASE_URL = 'https://iss.moex.com/iss/statistics/engines/stock/markets/index/analytics';
+export const BASE_URL = 'https://iss.moex.com/iss';
 export const LS_KEY = 'imoex_securities';
 
 export const INITIAL_DATA: ILsData = {
