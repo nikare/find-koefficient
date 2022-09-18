@@ -15,47 +15,46 @@ export const App = () => {
   );
 
   useEffect(() => {
-    if (Array.isArray(lsData.hidden)) {
-      lsData.hidden = { IMOEX: [], RGBITR: [], RUEYBCSTR: [] };
-    }
+    const typeStock = INDEX_IDS[lsData.indexId][2];
+    const market = INDEX_IDS[lsData.indexId][3];
     const urlPart = 'statistics/engines/stock/markets/index/analytics';
     const params = 'iss.meta=off&limit=1000';
     axios.get(`${BASE_URL}/${urlPart}/${lsData.indexId}.json?${params}`).then(({ data }) => {
       const tickers = data.analytics.data.map(([_, , ticker]: [any, any, string]) => ticker);
-      const urlPart = 'engines/stock/markets/shares/boards/TQBR/securities.json';
+      const urlPart = `engines/stock/markets/${typeStock}/boards/${market}/securities.json`;
       axios.get(`${BASE_URL}/${urlPart}?${params}?iss.meta=off`).then((response) => {
-        const prices: { price: number; change: number; percentChange: number }[] =
-          response.data.marketdata.data
-            .filter(([ticker]: [string]) => {
-              return tickers.includes(ticker);
-            })
-            .map((stock: (string | number)[]) => {
-              return {
-                ticker: stock[0],
-                price: stock[12],
-                change: stock[41],
-                percentChange: stock[25],
-              };
-            })
-            .reduce((accum: any, stock: any) => {
-              accum[stock.ticker] = {
-                price: stock.price,
-                change: stock.change,
-                percentChange: stock.percentChange,
-              };
-              return accum;
-            }, {} as { [key: string]: { price: number; change: number } });
+        const prices: {
+          [key: string]: { price: number; change: number; percentChange: number; dateExp: string };
+        } = response.data.marketdata.data
+          .filter(([ticker]: [string]) => {
+            return tickers.includes(ticker);
+          })
+          .map((stock: (string | number)[], index: number) => {
+            return {
+              ticker: stock[0],
+              price: typeStock === 'shares' ? stock[12] : (stock[11] as number) * 10,
+              dateExp: typeStock === 'bonds' ? response.data.securities.data[index][13] : undefined,
+              change: stock[41],
+              percentChange: stock[25],
+            };
+          })
+          .reduce((accum: any, stock: any) => {
+            const { price, change, percentChange, dateExp } = stock;
+            accum[stock.ticker] = { price, change, percentChange, dateExp };
+            return accum;
+          }, {});
 
         setDateTime(data['analytics.dates'].data[0][1]);
         setStocks(
           data.analytics.data.map((stock: any) => {
             return {
               ticker: stock[2],
-              title: stock[3],
+              title: INDEX_IDS[lsData.indexId][2] === 'shares' ? stock[3] : stock[3],
               weight: stock[5],
               price: prices[stock[2]].price,
               change: prices[stock[2]].change,
               percentChange: prices[stock[2]].percentChange,
+              dateExp: prices[stock[2]].dateExp,
               isHidden: lsData.hidden[lsData.indexId].includes(stock[2]),
             };
           }),
@@ -205,7 +204,7 @@ export const App = () => {
               onChange={onChangeIndexId}>
               <option value={INDEX_IDS.IMOEX[0]}>{INDEX_IDS.IMOEX[1]}</option>
               <option value={INDEX_IDS.RGBITR[0]}>{INDEX_IDS.RGBITR[1]}</option>
-              <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option>
+              {/* <option value={INDEX_IDS.RUEYBCSTR[0]}>{INDEX_IDS.RUEYBCSTR[1]}</option> */}
             </select>
           </div>
           <span className="date-time">{new Date(dateTime).toLocaleDateString('ru-RU')}г.</span>
@@ -238,7 +237,8 @@ export const App = () => {
             <th>#</th>
             <th>Тикер</th>
             <th>Название</th>
-            {INDEX_IDS[lsData.indexId][2] === 'stocks' && <th>Цена за акцию</th>}
+            {INDEX_IDS[lsData.indexId][2] === 'bonds' && <th>Дата погашения</th>}
+            <th>Цена актива</th>
             <th>Вес в индексе</th>
             <th>Доля в портфеле</th>
             <th></th>
@@ -247,7 +247,17 @@ export const App = () => {
         <tbody>
           {filteredStocks.map(
             (
-              { ticker, prefTicker, title, weight, isHidden, price, change, percentChange },
+              {
+                ticker,
+                prefTicker,
+                title,
+                weight,
+                isHidden,
+                price,
+                change,
+                percentChange,
+                dateExp,
+              },
               index,
             ) => {
               const isSnowball = lsData.service === 'snowball';
@@ -283,12 +293,15 @@ export const App = () => {
                     )}
                   </td>
                   <td>{title}</td>
-                  {INDEX_IDS[lsData.indexId][2] === 'stocks' && (
-                    <td className="price">
-                      <span>
-                        {price.toLocaleString('ru-RU')}
-                        <i>₽</i>
-                      </span>
+                  {dateExp && (
+                    <td>{new Date(dateExp).toLocaleString('ru-RU', { dateStyle: 'short' })}</td>
+                  )}
+                  <td className="price">
+                    <span>
+                      {price.toLocaleString('ru-RU')}
+                      <i>₽</i>
+                    </span>
+                    {INDEX_IDS[lsData.indexId][2] === 'shares' && (
                       <span
                         className={`change-stock ${
                           change > 0 ? 'plus' : change < 0 ? 'minus' : 'neutral'
@@ -299,8 +312,8 @@ export const App = () => {
                         </span>
                         <span>{`(${change > 0 ? '+' : ''}${percentChange}%)`}</span>
                       </span>
-                    </td>
-                  )}
+                    )}
+                  </td>
                   <td>{weight}%</td>
                   <td>{stakes[ticker]}%</td>
                   <td>

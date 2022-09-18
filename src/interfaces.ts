@@ -1,6 +1,6 @@
 export type Services = 'tinkoff' | 'snowball';
-export type IndexIds = 'IMOEX' | 'RGBITR' | 'RUEYBCSTR';
-export type SecuritiesType = 'bonds' | 'stocks';
+export type IndexIds = 'IMOEX' | 'RGBITR' /* | 'RUEYBCSTR'*/;
+export type SecuritiesType = 'bonds' | 'shares';
 
 export interface IStock {
   ticker: string;
@@ -13,6 +13,7 @@ export interface IStock {
   isPref: boolean;
   withPref: boolean;
   prefTicker?: string;
+  dateExp?: string;
 }
 
 export interface ILsData {
