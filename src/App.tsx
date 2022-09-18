@@ -328,7 +328,7 @@ export const App = () => {
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={7}>
+            <td colSpan={INDEX_IDS[lsData.indexId][2] === 'bonds' ? 8 : 7}>
               <span>Итого - </span>
               <span>по весу на МосБирже: {totalWeight}%</span>
               <span> | </span>
