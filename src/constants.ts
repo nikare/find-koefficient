@@ -6,7 +6,7 @@ export const LS_KEY = 'imoex_securities';
 export const INITIAL_DATA: ILsData = {
   isWeightSort: false,
   isAllVisible: false,
-  hidden: [],
+  hidden: { IMOEX: [], MOEXBC: [], RGBITR: [], RUEYBCSTR: [] },
   service: 'tinkoff',
   indexId: 'IMOEX',
 };

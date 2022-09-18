@@ -17,12 +17,20 @@ export const App = () => {
   useEffect(() => {
     const url = `${BASE_URL}/${lsData.indexId}.json`;
     const params = `iss.meta=off&limit=1000`;
+    if (Array.isArray(lsData.hidden)) {
+      lsData.hidden = { MOEXBC: [], IMOEX: [], RGBITR: [], RUEYBCSTR: [] };
+    }
     axios.get(`${url}?${params}`).then(({ data }) => {
       setDateTime(data['analytics.dates'].data[0][1]);
       setStocks(
         data.analytics.data.map(
           ([_, , ticker, title, , weight]: [any, any, string, string, any, number]) => {
-            return { ticker, title, weight, isHidden: lsData.hidden.includes(ticker) };
+            return {
+              ticker,
+              title,
+              weight,
+              isHidden: lsData.hidden[lsData.indexId].includes(ticker),
+            };
           },
         ),
       );
@@ -79,7 +87,8 @@ export const App = () => {
         .map(({ ticker }) => ticker);
 
       setLsData((prevState) => {
-        const newState = { ...prevState, hidden: hiddenTickets };
+        const newState = { ...prevState };
+        newState.hidden[lsData.indexId] = hiddenTickets;
         localStorage.setItem(LS_KEY, JSON.stringify(newState));
         return newState;
       });

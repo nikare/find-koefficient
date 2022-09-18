@@ -15,7 +15,9 @@ export interface IStock {
 export interface ILsData {
   isWeightSort: boolean;
   isAllVisible: boolean;
-  hidden: string[];
+  hidden: {
+    [key in IndexIds]: string[];
+  };
   service: Services;
   indexId: IndexIds;
 }
